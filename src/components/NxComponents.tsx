@@ -19,8 +19,10 @@
 import "@components/NxComponents.css";
 
 import { classes } from "@utils/misc";
-import { Text } from "@webpack/common";
 import { HTMLProps, PropsWithChildren } from "react";
+
+import { Heading } from "./Heading";
+import { Paragraph } from "./Paragraph";
 
 
 
@@ -43,7 +45,7 @@ export function NxCard(props: NxCardProps) {
 
 export function NxTitle(props: PropsWithChildren<HTMLProps<HTMLElement>>) {
     return (
-        <Text variant="heading-md/bold" {...props} className={classes(props.className, "nx-title")}>{props.children}</Text>
+        <Heading {...props} className={classes(props.className, "nx-title")}>{props.children}</Heading>
     );
 }
 
@@ -56,6 +58,6 @@ interface NxTextProps extends PropsWithChildren<Omit<HTMLProps<HTMLElement>, "si
 export function NxText(props: NxTextProps) {
     props.size ??= "medium";
     return (
-        <Text {...props} variant={props.size === "medium" ? "text-md/normal" : "text-sm/normal"} className={classes(props.className, "nx-text", props.size === "small" && "nx-text-small")}>{props.children}</Text>
+        <Paragraph {...props} size={props.size === "medium" ? "md" : "sm"} className={classes(props.className, "nx-text", props.size === "small" && "nx-text-small")}>{props.children}</Paragraph>
     );
 }

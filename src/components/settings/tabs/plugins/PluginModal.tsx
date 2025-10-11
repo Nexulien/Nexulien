@@ -76,12 +76,16 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id
-                    ? await UserUtils.getUser(`${user.id}`)
-                        .catch(() => makeDummyUser({ username: user.name }))
-                    : makeDummyUser({ username: user.name });
+                try {
+                    const author = user.id
+                        ? await UserUtils.getUser(String(user.id))
+                            .catch(() => makeDummyUser({ username: user.name }))
+                        : makeDummyUser({ username: user.name });
 
-                setAuthors(a => [...a, author]);
+                    setAuthors(a => [...a, author]);
+                } catch (e) {
+                    continue;
+                }
             }
         })();
     }, [plugin.authors]);

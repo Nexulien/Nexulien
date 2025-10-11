@@ -19,10 +19,12 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { NxCard, NxText, NxTitle } from "@components/NxComponents";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -71,55 +73,53 @@ function SettingsSyncSection() {
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
-        <section className={Margins.top16}>
-            <NxCard>
-                <NxTitle>Settings Sync</NxTitle>
+        <section className={Margins.top16}><NxCard>
+            <NxTitle>Settings Sync</NxTitle>
 
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
-                    minimal effort.
-                </Forms.FormText>
-                <FormSwitch
-                    key="cloud-sync"
-                    title="Settings Sync"
-                    value={cloud.settingsSync}
-                    onChange={v => { cloud.settingsSync = v; }}
-                    className="nx-removeSwitchDivider"
-                    disabled={!cloud.authenticated}
-                />
-                <div className="vc-cloud-settings-sync-grid">
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        disabled={!sectionEnabled}
-                        onClick={() => putCloudSettings(true)}
-                    >
-                        Sync to Cloud
-                    </Button>
-                    <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <Button
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                size={Button.Sizes.SMALL}
-                                color={Button.Colors.RED}
-                                disabled={!sectionEnabled}
-                                onClick={() => getCloudSettings(true, true)}
-                            >
-                                Sync from Cloud
-                            </Button>
-                        )}
-                    </Tooltip>
-                    <Button
-                        size={Button.Sizes.SMALL}
-                        color={Button.Colors.RED}
-                        disabled={!sectionEnabled}
-                        onClick={() => deleteCloudSettings()}
-                    >
-                        Delete Cloud Settings
-                    </Button>
-                </div>
-            </NxCard>
-        </section>
+            <Paragraph className={Margins.bottom20}>
+                Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
+                minimal effort.
+            </Paragraph>
+            <FormSwitch
+                key="cloud-sync"
+                title="Settings Sync"
+                value={cloud.settingsSync}
+                onChange={v => { cloud.settingsSync = v; }}
+                className="nx-removeSwitchDivider"
+                disabled={!cloud.authenticated}
+            />
+            <div className="vc-cloud-settings-sync-grid">
+                <Button
+                    size={Button.Sizes.SMALL}
+                    disabled={!sectionEnabled}
+                    onClick={() => putCloudSettings(true)}
+                >
+                    Sync to Cloud
+                </Button>
+                <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
+                    {({ onMouseLeave, onMouseEnter }) => (
+                        <Button
+                            onMouseLeave={onMouseLeave}
+                            onMouseEnter={onMouseEnter}
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.RED}
+                            disabled={!sectionEnabled}
+                            onClick={() => getCloudSettings(true, true)}
+                        >
+                            Sync from Cloud
+                        </Button>
+                    )}
+                </Tooltip>
+                <Button
+                    size={Button.Sizes.SMALL}
+                    color={Button.Colors.RED}
+                    disabled={!sectionEnabled}
+                    onClick={() => deleteCloudSettings()}
+                >
+                    Delete Cloud Settings
+                </Button>
+            </div>
+        </NxCard ></section>
     );
 }
 
@@ -137,7 +137,6 @@ function CloudTab() {
                         can host it yourself. It may or may not work with Nexulien; use with caution.
                     </NxText>
                 </NxCard>
-
                 <FormSwitch
                     key="backend"
                     title="Enable Cloud Integrations"
@@ -198,6 +197,8 @@ function CloudTab() {
                             </Button>
                         </Grid>
                     </NxCard >
+
+                    <Divider className={Margins.top16} />
                     <SettingsSyncSection />
                 </> : <></>}
             </section>

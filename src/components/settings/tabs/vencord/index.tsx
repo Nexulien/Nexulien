@@ -21,6 +21,7 @@ import "@components/settings/styles.css";
 
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, PaintbrushIcon, RestartIcon } from "@components/index";
 import { NxCard, NxText } from "@components/NxComponents";
@@ -37,7 +38,7 @@ import { Margins } from "@utils/margins";
 import { classes, isPluginDev } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import { relaunch } from "@utils/native";
-import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, UserStore } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, UserStore } from "@webpack/common";
 
 import { VibrancySettings } from "./MacVibrancySettings";
 
@@ -57,52 +58,73 @@ function Switches() {
         {
             key: "useQuickCss",
             title: "Enable Custom CSS",
-            note: "Loads your Custom CSS"
         },
         !IS_WEB && {
             key: "enableReactDevtools",
             title: "Enable React Developer Tools",
-            note: "Requires a full restart"
+            restartRequired: true
         },
         !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS ? {
             key: "frameless",
             title: "Disable the window frame",
-            note: "Requires a full restart"
+            restartRequired: true
         } : {
             key: "winNativeTitleBar",
             title: "Use Windows' native title bar instead of Discord's custom one",
-            note: "Requires a full restart"
+            restartRequired: true
         }),
         !IS_WEB && {
             key: "transparent",
-            title: "Enable window transparency.",
-            note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
-        },
-        !IS_WEB && IS_WINDOWS && {
-            key: "winCtrlQ",
-            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-            note: "Requires a full restart"
+            title: "Enable window transparency",
+            description: "A theme that supports transparency is required or this will do nothing. Stops the window from being resizable as a side effect",
+            restartRequired: true
         },
         IS_DISCORD_DESKTOP && {
             key: "disableMinSize",
             title: "Disable minimum window size",
-            note: "Requires a full restart"
+            restartRequired: true
+        },
+        !IS_WEB && IS_WINDOWS && {
+            key: "winCtrlQ",
+            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            restartRequired: true
         },
     ] satisfies Array<false | {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
-        note: string;
+        description?: string;
+        restartRequired?: boolean;
     }>;
 
-    return Switches.map(s => s && (
-        <FormSwitch
-            key={s.key}
-            title={s.title}
-            description={s.note}
-            value={settings[s.key]}
-            onChange={v => settings[s.key] = v}
-        />
-    ));
+    return Switches.map(setting => {
+        if (!setting) {
+            return null;
+        }
+
+        const { key, title, description, restartRequired } = setting;
+
+        return (
+            <FormSwitch
+                key={key}
+                title={title}
+                description={description}
+                value={settings[key]}
+                onChange={v => {
+                    settings[key] = v;
+
+                    if (restartRequired) {
+                        Alerts.show({
+                            title: "Restart Required",
+                            body: "A restart is required to apply this change",
+                            confirmText: "Restart now",
+                            cancelText: "Later!",
+                            onConfirm: relaunch
+                        });
+                    }
+                }}
+            />
+        );
+    });
 }
 
 function VencordSettings() {
@@ -110,69 +132,72 @@ function VencordSettings() {
 
     const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
 
-    const user = UserStore.getCurrentUser();
+    const user = UserStore?.getCurrentUser();
 
     return (
-        <>
-            <SettingsTab title="Nexulien Settings">
-                <HeaderCard />
+        <SettingsTab title="Nexulien Settings">
+            <HeaderCard />
 
-                {isPluginDev(user?.id) && !hideContributorCard && (
-                    <SpecialCard
-                        title="Contributions"
-                        subtitle="Thank you for contributing!"
-                        description="Since you've contributed to Nexulien, you now have a cool new badge!"
-                        cardImage={CONTRIB_IMAGE}
-                        backgroundImage={CONTRIB_BACKGROUND_IMAGE}
-                        backgroundGradient="linear-gradient(to left, var(--nx-green), var(--nx-purple))"
+            {isPluginDev(user?.id) && !hideContributorCard && (
+                <SpecialCard
+                    title="Contributions"
+                    subtitle="Thank you for contributing!"
+                    description="Since you've contributed to Nexulien, you now have a cool new badge!"
+                    cardImage={CONTRIB_IMAGE}
+                    backgroundImage={CONTRIB_BACKGROUND_IMAGE}
+                    backgroundGradient="linear-gradient(to left, var(--nx-green), var(--nx-purple))"
+                />
+            )}
+
+            <section>
+                <QuickActionContainer title="Quick Actions" columns="2">
+                    <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Edit QuickCSS"
+                        action={() => VencordNative.quickCss.openEditor()}
                     />
-                )}
-
-                <section>
-                    <QuickActionContainer title="Quick Actions" columns="2">
+                    {!IS_WEB && (<>
                         <QuickAction
-                            Icon={PaintbrushIcon}
-                            text="Edit QuickCSS"
-                            action={() => VencordNative.quickCss.openEditor()}
+                            Icon={RestartIcon}
+                            text="Relaunch Discord"
+                            action={relaunch}
                         />
-                        {!IS_WEB && (<>
-                            <QuickAction
-                                Icon={RestartIcon}
-                                text="Relaunch Discord"
-                                action={relaunch}
-                            />
-                            <QuickAction
-                                Icon={FolderIcon}
-                                text="Settings Folder"
-                                action={() => VencordNative.settings.openFolder()}
-                            />
-                        </>
-                        )}
                         <QuickAction
-                            Icon={GithubIcon}
-                            text="View Source Code"
-                            action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                            Icon={FolderIcon}
+                            text="Settings Folder"
+                            action={() => VencordNative.settings.openFolder()}
                         />
-                    </QuickActionContainer>
-                </section>
+                    </>
+                    )}
+                    <QuickAction
+                        Icon={GithubIcon}
+                        text="View Source Code"
+                        action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                    />
+                </QuickActionContainer>
+            </section>
 
-                <section className={Margins.top16}>
-                    <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
-                    {showHint ?
-                        <NxCard variant="help" size="small" className={Margins.bottom16}>
-                            <NxText size="small">
-                                If you'd like to change the position of the Nexulien section, change the header card size, or just hide this hint, you can do so in the
-                                {" "}<a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
-                                    settings of the Settings plugin
-                                </a>!
-                            </NxText>
-                        </NxCard> : <></>}
-                    <Switches />
-                    {needsVibrancySettings && <VibrancySettings />}
-                </section>
-                {BackupAndRestoreTab()}
-            </SettingsTab>
-        </>
+            <Divider />
+
+            <section className={Margins.top16}>
+                <Forms.FormTitle tag="h5">Settings</Forms.FormTitle>
+                {showHint ?
+                    <NxCard variant="help" size="small" className={Margins.bottom16}>
+                        <NxText size="small">
+                            If you'd like to change the position of the Nexulien section, change the header card size, or just hide this hint, you can do so in the
+                            {" "}<a onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}>
+                                settings of the Settings plugin
+                            </a>!
+                        </NxText>
+                    </NxCard> : <></>
+                }
+
+                <Switches />
+            </section>
+
+            {needsVibrancySettings && <VibrancySettings />}
+            {BackupAndRestoreTab()}
+        </SettingsTab>
     );
 }
 

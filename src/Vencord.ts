@@ -20,8 +20,10 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
+import { addVencordUiStyles } from "@components/css";
 import { openUpdaterModal } from "@components/settings/tabs/updater";
 import { IS_WINDOWS } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
@@ -165,15 +167,13 @@ async function init() {
 startAllPlugins(StartAt.Init);
 init();
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-        startAllPlugins(StartAt.DOMContentLoaded);
+document.addEventListener("DOMContentLoaded", () => {
+    addVencordUiStyles();
 
+    startAllPlugins(StartAt.DOMContentLoaded);
+
+    // FIXME
     if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
-        document.head.append(Object.assign(document.createElement("style"), {
-            id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar]{display: none!important}"
-        }));
+        createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });

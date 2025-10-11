@@ -21,17 +21,19 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { HeadingTertiary } from "@components/Heading";
 import { NxCard, NxText, NxTitle } from "@components/NxComponents";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ChangeList } from "@utils/ChangeList";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
-import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
+import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -40,8 +42,6 @@ import { PluginCard } from "./PluginCard";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
-
-const InputStyles = findByPropsLazy("inputWrapper", "inputError", "error");
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -92,10 +92,10 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     };
 
     return (
-        <>
+        <Paragraph className={Margins.top16}>
             {matchingExcludedPlugins.length
-                ? <Text variant="text-md/normal" className={Margins.top16}>
-                    <Forms.FormText>Are you looking for:</Forms.FormText>
+                ? <>
+                    <Paragraph>Are you looking for:</Paragraph>
                     <ul>
                         {matchingExcludedPlugins.map(([name, reason]) => (
                             <li key={name}>
@@ -103,10 +103,10 @@ function ExcludedPluginsList({ search }: { search: string; }) {
                             </li>
                         ))}
                     </ul>
-                </Text>
-                : <Text variant="text-md/normal" className={classes(Margins.top16, cl("noResults"))}>No plugins meet the search criteria.</Text>
+                </>
+                : <Paragraph className={classes(Margins.top16, cl("noResults"))}>No plugins meet the search criteria.</Paragraph>
             }
-        </>
+        </Paragraph>
     );
 }
 
@@ -256,15 +256,11 @@ function PluginSettings() {
         <SettingsTab title="Plugins">
             <ReloadRequiredCard required={changes.hasChanges} />
 
-            {/* <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                Filters
-            </Forms.FormTitle> */}
-
             <div className={classes(Margins.bottom20, cl("filter-controls"))}>
                 <ErrorBoundary noop>
                     <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
                 </ErrorBoundary>
-                <div className={InputStyles.inputWrapper}>
+                <div>
                     <ErrorBoundary noop>
                         <Select
                             options={[
@@ -284,36 +280,27 @@ function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
+            <HeadingTertiary className={Margins.top20}>Plugins</HeadingTertiary>
 
             {plugins.length || requiredPlugins.length
                 ? (
-                    <>
-                        {plugins.length
-                            ? <div className={cl("grid")}>
-                                {plugins}
-                            </div>
-                            : <Text variant="text-md/normal" className={cl("noResults")}>No plugins meet the search criteria.</Text>
-                        }
-                    </>
+                    plugins.length
+                        ? <div className={cl("grid")}>{plugins}</div>
+                        : <Paragraph className={cl("noResults")}>No plugins meet the search criteria.</Paragraph>
                 )
                 : <ExcludedPluginsList search={search} />
             }
 
 
-            <Forms.FormDivider className={Margins.top20} />
+            <Divider className={Margins.top20} />
 
-            <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
+            <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>
                 Required Plugins
-            </Forms.FormTitle>
-            <>
-                {requiredPlugins.length
-                    ? <div className={cl("grid")}>
-                        {requiredPlugins}
-                    </div>
-                    : <Text variant="text-md/normal" className={cl("noResults")}>No plugins meet the search criteria.</Text>
-                }
-            </>
+            </HeadingTertiary>
+            {requiredPlugins.length
+                ? <div className={cl("grid")}>{requiredPlugins}</div>
+                : <Paragraph className={cl("noResults")}>No plugins meet the search criteria.</Paragraph>
+            }
         </SettingsTab >
     );
 }
@@ -321,8 +308,8 @@ function PluginSettings() {
 function makeDependencyList(deps: string[]) {
     return (
         <>
-            <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            <Paragraph>This plugin is required by:</Paragraph>
+            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{dep}</Paragraph>)}
         </>
     );
 }
