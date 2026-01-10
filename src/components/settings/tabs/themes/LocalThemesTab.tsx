@@ -6,7 +6,6 @@
 
 import { isPluginEnabled } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import { NxCard, NxText, NxTitle } from "@components/NxComponents";
@@ -14,7 +13,9 @@ import { QuickAction, QuickActionContainer } from "@components/settings/QuickAct
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import { UserThemeHeader } from "@main/themes";
 import ClientThemePlugin from "@plugins/clientTheme";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { findLazy } from "@webpack";
 import { Forms, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
@@ -85,7 +86,7 @@ export function LocalThemesTab() {
 
     return (
         <>
-            <NxCard className={cl("info-card")}>
+            <NxCard className={classes(cl("info-card"), Margins.bottom16)}>
                 <NxTitle>Find Themes:</NxTitle>
                 <div style={{ marginBottom: ".5em", display: "flex", flexDirection: "column" }}>
                     <ul>

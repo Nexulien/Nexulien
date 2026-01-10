@@ -6,7 +6,6 @@
 
 import "./QuickAction.css";
 
-import { classNameFactory } from "@api/Styles";
 import { InfoIcon } from "@components/Icons";
 import { NxCard, NxText, NxTitle } from "@components/NxComponents";
 import { openInviteModal } from "@utils/discord";
@@ -14,6 +13,7 @@ import { classes } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, GuildStore, NavigationRouter } from "@webpack/common";
+import { classNameFactory } from "@utils/css";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
 const cl = classNameFactory("vc-settings-quickActions-");

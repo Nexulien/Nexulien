@@ -17,7 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, CloudIcon, LogIcon,MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
+import { BackupRestoreIcon, CloudIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import { BackupAndRestoreTab, CloudTab, NotificationsTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -112,7 +112,7 @@ const settings = definePluginSettings({
             { label: "Default - as much as intended", value: "default", default: true },
             { label: "Minimal - small card with logo and buttons", value: "minimal" },
             { label: "None", value: "none" },
-        ] as { label: string; value: HeaderCardSize; default?: boolean }[]
+        ] as { label: string; value: HeaderCardSize; default?: boolean; }[]
     },
 });
 
@@ -320,7 +320,7 @@ export default definePlugin({
         const vencordSection: SettingsLayoutNode = {
             key: "vencord_section",
             type: LayoutTypes.SECTION,
-            useLabel: () => "Nexulien",
+            useTitle: () => "Nexulien Settings",
             buildLayout: () => vencordEntries
         };
 
