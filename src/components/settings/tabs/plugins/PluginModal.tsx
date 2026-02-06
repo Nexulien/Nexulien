@@ -24,7 +24,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { NxCard, NxText } from "@components/NxComponents";
 import { debounce } from "@shared/debounce";
-import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -33,7 +32,7 @@ import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, Mod
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -72,6 +71,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
+    // avoid layout shift by showing dummy users while loading users
+    const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
     const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
     useEffect(() => {
@@ -184,11 +185,37 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <ModalCloseButton onClick={onClose} />
             </ModalHeader>
 
-            <ModalContent className={Margins.bottom16}>
+            <ModalContent className={"vc-settings-modal-content"}>
                 <section>
                     <Flex className={cl("info")}>
                         <Forms.FormText className={cl("description")}>{plugin.description}</Forms.FormText>
                     </Flex>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <div style={{ width: "fit-content" }}>
+                        <ErrorBoundary noop>
+                            <UserSummaryItem
+                                users={authors.length ? authors : fallbackAuthors}
+                                guildId={undefined}
+                                renderIcon={false}
+                                max={6}
+                                showDefaultAvatarsForNullUsers
+                                renderMoreUsers={renderMoreUsers}
+                                renderUser={(user: User) => (
+                                    <Clickable
+                                        className={AvatarStyles.clickableAvatar}
+                                        onClick={() => openContributorModal(user)}
+                                    >
+                                        <img
+                                            className={AvatarStyles.avatar}
+                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            alt={user.username}
+                                            title={user.username}
+                                        />
+                                    </Clickable>
+                                )}
+                            />
+                        </ErrorBoundary>
+                    </div>
                 </section>
 
                 {!!plugin.settingsAboutComponent && (
